@@ -1,24 +1,13 @@
+cat > package.json << 'EOF'
 {
-  "name": "cloud-config-system",
+  "name": "perc-config",
   "version": "1.0.0",
-  "description": "Secure Cloud Configuration System with WebSocket for Roblox Executors",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node server.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.43.4",
-    "bcryptjs": "^2.4.3",
-    "cookie-parser": "^1.4.6",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "express-rate-limit": "^7.3.1",
-    "helmet": "^7.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "ws": "^8.17.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.2"
+    "express": "^4.18.2"
   }
 }
+EOF
