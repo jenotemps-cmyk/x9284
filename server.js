@@ -18,209 +18,349 @@ const wss = new WebSocket.Server({ noServer: true });
 // Configuration
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_for_jwt_tokens';
-const DB_FILE = path.join(__dirname, 'database.json');
 
-// Default configuration (sacrifice lua table)
-const DEFAULT_LUA_CONFIG = getgenv().sacrifice_RespawnLock = false 
-
-getgenv().sacrifice = {
-    ["Global WallCheck"] = true, 
-    ["Knock Check"] = true,
-
-    Watermark = {
-        Enabled = true,
-        Username = "i love amayaa", 
-        Color = Color3.fromRGB(12, 12, 255) 
-    },
-
-    ['fov'] = {
-        ['enabled'] = true,
-        ['visible'] = false,
-        ['radius'] = 15, 
-        ['color'] = Color3.fromRGB(0, 17, 255),
-        ['thickness'] = 1.5,
-        ['transparency'] = 1,
-        ['filled'] = false
-    },
-
-    ["Silent Aim"] = {
-        Enabled = true,
-        AutoPrediction = false,
-        AntiCurve = false,
-        AntiCurveAngle = 30,
-        HitPart = "Head", -- either Closest or any hitpart *case sensitive*
-        TargetPriority = "FOV", 
-        Mode = "Automatic",  -- 'Automatic' or 'Target'
-        TargetKeybind = "C", 
-        LockedTarget = nil, 
-        TargetModeForceHit = false,
-        Smoothing = 0.1, 
-        HorizontalPrediction = 0, 
-        VerticalPrediction = 0,
-        HitChance = 100, 
-    },
-
-    Camlock = {
-        Enabled = true,
-        Keybind = "Q",
-        UnlockOnDeath = true,
-        AutoPrediction = false,
-        Method = "Camera",  -- 'Camera' or 'Mouse'
-        HitPart = "Head", 
-        TargetMode = "Toggle", -- 'Toggle' or 'Hold'
-        Snappiness = 0.029,
-        HorizontalPrediction = 0.03, 
-        VerticalPrediction = 0.03,
-        WallCheck = false,
-        Shake = {
-            Enabled = true,
-            ShakeMode = "WholeBody",  -- 'WholeBody' or 'PerPart'
-            X = 0.5, 
-            Y = 0.5,  
+// Default configuration (sacrifice aim assist Lua table)
+const DEFAULT_LUA_CONFIG = `getgenv().Perc = {
+    ['Settings'] = {
+        ['Watermark'] = {
+            ['Enabled'] = true,
+            ['Color'] = Color3.fromRGB(193, 153, 255),
+            ['VersionColor'] = Color3.fromRGB(255, 255, 255)
         }
     },
 
-    Orbit = {
-        Enabled = false,
-        Keybind = "X",
-        TargetPlayer = nil, 
-        Distance = 7,
-        Height = -5.5,  -- and negeitive number means u are underground so use wallbang
-        Speed = 10,
-        AutoKill = false,
-        AutoReload = true,
-        ReloadAmmoCount = 0 
+    ['Checks'] = {
+        ['Crew Check'] = false,
+        ['Player Visible'] = false,
+        ['Player Knocked'] = false,
     },
 
-    SpreadMod = {
-        Enabled = false,
-        Amount = 0
+    ['Aim Assist'] = {
+        ['Enabled'] = true,
+        ['LegitMode'] = true, 
+        ['LegitSpeed'] = 0.1,
+        ['Shake'] = {
+            ['Enabled'] = false,
+            ['Intensity'] = 2,
+            ['Speed'] = 2
+        },
+        ['Smoothing'] = 0.01,
+        ['ActivationMode'] = 'Hold',
+        ['Mode'] = 'HitPart',
+        ['EasingStyle'] = 'Linear',
+        ['EasingDirection'] = 'Out',
+        ['Part'] = 'Head',
+        ['UsePrediction'] = false,
+        ['Prediction'] = { ['X'] = 0, ['Y'] = 0, ['Z'] = 0 },
+        ['FOV'] = {
+            ['Enabled'] = true,
+            ['Visible'] = false, 
+            ['Radius'] = 999999,
+            ['Color'] = Color3.fromRGB(255, 255, 255)
+        },
+        ['Back Air'] = {
+            ['Enabled'] = false,
+            ['ActivationMode'] = 'Toggle'
+        }
     },
 
-    ["Hitbox Expander"] = {
-        Enabled = false,
-        Size = 4, -- 2 is default around 3 in das or simmilar ripoffs
-        Visualize = false
-    },
-
-    Triggerbot = {
-        Enabled = true,
-        Prediction = 0, 
-        Weapons = {
-            '[Double-Barrel SG]',
-            '[Revolver]',
-            '[TacticalShotgun]',
-            '[Tactical Shot shotgun]',
-            '[Glock]'
-        },
-        Keybind = "C",
-        Mode = "Toggle", 
-        Delay = 0.15, 
-        HitParts = {
-            Type = false, 
-            Parts = {'Head', 'UpperTorso', 'HumanoidRootPart', 'LowerTorso', 'LeftHand', 'RightHand', 'LeftLowerArm', 'RightLowerArm', 'LeftUpperArm', 'RightUpperArm', 'LeftFoot', 'LeftLowerLeg',  'LeftUpperLeg', 'RightLowerLeg', 'RightFoot',  'RightUpperLeg'}
-        },
-        CustomSize = {
-            Enabled = true, 
-            Value = 40  -- this is ur fov
-        },
-        Active = false 
-    },
-
-    ["Weapon Mods"] = {
-        Traced = { 
-           RapidFire = false, RapidFireDelay = 0.01 
-        },
-        ["Delay Changer"] = {
-            Enabled = true,
-            GlobalDelay = 0.05, 
-            Weapons = { 
-                ["[Revolver]"] = { Enabled = true, Delay = 0.05 },
-                ["[Glock]"] = { Enabled = false, Delay = 0.05 },
-                ["[Double-Barrel SG]"] = { Enabled = false, Delay = 0.05 },
-                ["[Tactical Shotgun]"] = { Enabled = false, Delay = 0.05 },
+    ['Silent Aim'] = {
+        ['Enabled'] = true,
+        ['ClientRedirection'] = {
+            ['Enabled'] = false,
+            ['Settings'] = {
+                ['Mask Spread'] = false,
             }
+        },
+        ['Mode'] = 'HitPart',
+        ['Part'] = 'Head',
+        ['Smart'] = {
+            ['Points'] = 5,
+            ['PointScale'] = 0.8,
+        },
+        ['UsePrediction'] = false,
+        ['Prediction'] = { 
+            ['X'] = 0,
+            ['Y'] = 0, 
+            ['Z'] = 0
+        },
+        ['Future'] = {
+            ['Enabled'] = false,
+            ['Multiplier'] = 1.0,
+            ['NetworkPrediction'] = true,
+            ['GroundPrediction'] = true,
+            ['BulletSpeed'] = 725,
+            ['Default'] = { 
+                ['X'] = 0.05, 
+                ['Y'] = 0.02, 
+                ['Z'] = 0.03
+            },
+            ['Guns'] = {
+                ['[Double-Barrel SG]'] = { 
+                    ['X'] = 0.05, 
+                    ['Y'] = 0.02, 
+                    ['Z'] = 0.03
+                },
+                ['[Revolver]'] = { 
+                    ['X'] = 0.05, 
+                    ['Y'] = 0.02, 
+                    ['Z'] = 0.03
+                },
+                ['[TacticalShotgun]'] = { 
+                    ['X'] = 0.05, 
+                    ['Y'] = 0.02, 
+                    ['Z'] = 0.03
+                },
+            }
+        },
+        ['Rage'] = {
+            ['Enabled'] = false,
+        },
+        ['FOV'] = {
+            ['Enabled'] = true,
+            ['Projected'] = false, 
+            ['Visible'] = false,
+            ['Radius'] = 999999999999,
+            ['ActiveColor'] = Color3.fromRGB(0, 255, 0),
+            ['InactiveColor'] = Color3.fromRGB(255, 0, 0)
         }
     },
 
-    Visuals = {
-        ["Color Modifications"] = { Enabled = true, Vibrancy = 0.5, Contrast = 0, Brightness = 0 },
-        Sky = { Enabled = false, Color = "Black" },
-        
-		ESP = { 
-            Enabled = true, 
-            Keybind = "B", 
-            Size = 11, 
-            DefaultColor = Color3.fromRGB(255, 255, 255), 
-            TargetColor = Color3.fromRGB(255, 0, 0),
-            SilentAimTargetColor = Color3.fromRGB(255, 0, 255)
+    ['Debug'] = {
+        ['Enabled'] = false,
+        ['ShowPoints'] = false,
+        ['PrintTargets'] = false,
+        ['PrintInputs'] = false 
+    },
+
+    ['Trigger Bot'] = {
+        ['Enabled'] = true,
+        ['ActivationMode'] = 'Hold',
+        ['Delay'] = 0.01,
+        ['Blacklisted Tools'] = { 
+            '[Knife]',
+        },
+        ['FOV'] = {
+            ['Enabled'] = true,
+            ['Radius'] = 999999999,
+        }
+    },
+
+    ['Gun Modifications'] = {
+        ['Double Tap'] = {
+            ['Enabled'] = false,
+            ['Weapons'] = { 
+                '[Revolver]', 
+                '[Double-Barrel SG]'
+            },
+        },
+        ['Quick Reload'] = {
+            ['Enabled'] = false,
+            ['Weapons'] = { 
+                '[Revolver]', 
+                '[Double-Barrel SG]',
+                '[Tactical Shotgun]'
+            },
+        },
+        ['Spread Modifications'] = {
+            ['Enabled'] = true,
+            ['Weapons'] = {
+                ['[Double-Barrel SG]'] = {
+                    ['Enabled'] = true,
+                    ['SpreadAmount'] = 0,
+                },
+                ['[TacticalShotgun]'] = {
+                    ['Enabled'] = true,
+                    ['SpreadAmount'] = 0,
+                },
+            },
+        },
+        ['Cooldown Changer'] = {
+            ['Enabled'] = true,
+            ['Default'] = 0.15,
+            ['Weapons'] = {
+                ['[Revolver]'] = { 
+                    ['Enabled'] = true, 
+                    ['Delay'] = 0.15
+                },
+                ['[Double-Barrel SG]'] = { 
+                    ['Enabled'] = false, 
+                    ['Delay'] = 0.05 
+                },
+                ['[TacticalShotgun]'] = { 
+                    ['Enabled'] = false, 
+                    ['Delay'] = 0.05 
+                },
+            }
+        },
+        ['Shooting Factors'] = {
+            ['Enabled'] = true,
+            ['Weapons'] = {
+                ['[Revolver]'] = true,
+                ['[Double-Barrel SG]'] = true,
+                ['[TacticalShotgun]'] = true,
+            },
+            ['Factors'] = {
+                ['FULLY_LOADED_CHAR'] = true,
+                ['FORCEFIELD'] = true,
+                ['GRABBING_CONSTRAINT'] = true,
+                ['Christmas_Sock'] = true,
+                ['CUFFED'] = true,
+                ['ATTACKING'] = true,
+                ['K.O'] = false,
+                ['GRABBED'] = true,
+                ['RELOAD'] = true,
+                ['DEAD'] = false,
+                ['BLOCK'] = false,
+                ['CROUCH'] = false,
+                ['COOLDOWN'] = true,
+                ['ALL'] = true
+            }
+        },
+        ['Damage Overrider'] = {
+            ['Enabled'] = true,
+            ['Part'] = 'Head'
+        },
+        ['One Tap'] = {
+            ['Enabled'] = false,
+            ['Weapons'] = {
+                '[Double-Barrel SG]',
+                '[TacticalShotgun]',
+            }
+        },
+        ['Infinite Range'] = {
+            ['Enabled'] = true,
+            ['Mode'] = 'Bullet TP',
+            ['Bullet TP'] = {
+                ['Range'] = 9999999999999,
+                ['BypassPos'] = 10
+            },
+            ['Guns'] = {
+                ['[Revolver]'] = {
+                    ['Enabled'] = true,
+                    ['Range'] = 9999
+                },
+                ['[Double-Barrel SG]'] = {
+                    ['Enabled'] = true,
+                    ['Range'] = 9999
+                },
+                ['[TacticalShotgun]'] = {
+                    ['Enabled'] = true,
+                    ['Range'] = 9999
+                }
+            }
+        },
+        ['Hit Offset'] = {
+            ['Enabled'] = false,
+            ['Default'] = {
+                ['X'] = 0,
+                ['Y'] = 0,
+                ['Z'] = 0,
+            },
+            ['Weapons'] = {
+                ['[Revolver]'] = { ['X'] = 0, ['Y'] = 0, ['Z'] = 0 },
+                ['[TacticalShotgun]'] = { ['X'] = 1, ['Y'] = 0, ['Z'] = -1 },
+            }
+        },
+        ['Hitbox Expander'] = {
+            ['Enabled'] = true,
+            ['Size'] = 10,
         },
     },
-    
-    ["Speed Modifications"] = { 
-        Options = { Enabled = true, DefaultSpeed = 76, Method = "WalkSpeed", Keybind = "V" } 
+
+    ['Wall Bang'] = {
+        ['Enabled'] = true,
+        ['Weapons'] = {
+            '[Revolver]',
+            '[Double-Barrel SG]',
+            '[TacticalShotgun]'
+        },
     },
 
-    ["Jump Modifications"] = {
-        Enabled = false,
-        JumpPower = 100,
-        Keybind = "H"
-    },
-
-    ["Damage Modifications"] = {
-        Overrider = { Enabled = false, Damage = 150 },
-        Amplifier = { Enabled = false, Multiplier = 10 }
-    },
-
-    Spiderman = { 
-        Enabled = true, 
-        ["Jump Boost"] = 80,["Jump Delay"] = 0, 
-        Keybind = "J" 
-    },
-    
-    ["Infinite Range"] = { 
-        Enabled = true, 
-        Range = 10000, 
-        BypassPos = 1 
-    },
-
-    ["Wallbang"] = {
-        Enabled = true
-    },
-
-    AntiStomp = {
-        Enabled = false
-    },
-    
-    ["Panic Ground"] = {
-        Enabled = true,
-        Keybind = "P"
-    },
-    
-    ["Skin Changer"] = { 
-        Enabled = false, 
-        Skins = {
-            ["[Revolver]"] = "Inferno",
-            ["[Tactical Shotgun]"] = "Galaxy",
-            ["[Knife]"] = "Golden Age Tanto",
-            ["[Double Barrel SG]"] = "Galaxy"
-        } 
-    },
-    
-    ["Avatar Modifications"] = {
-        Enabled = false,
-        Headless = false,
-        Korblox = false,
-        Morph = {
-            Enabled = false,
-            TargetId = 1
+    ['Skin Changer'] = {
+        ['Enabled'] = false,
+        ['Weapons'] = {
+            ['[Double-Barrel SG]'] = 'Galaxy',
+            ['[Revolver]'] = 'Golden Age',
+            ['[TacticalShotgun]'] = 'Galaxy',
+            ['[Knife]'] = 'Golden Age Tanto',
         }
     },
 
-    Hitsounds = {
-        Enabled = false,
-        Sound = "", 
-        Volume = 3 
+    ['Targeting'] = {
+        ['Enabled'] = true,
+        ['ActivationMode'] = 'Hold',
+        ['SelectionFOV'] = 99999999, 
+        ['Strict'] = true
+    },
+
+    ['Visuals'] = {
+        ['ESP'] = {
+            ['Enabled'] = true,
+            ['Boxes'] = true,
+            ['Names'] = true,
+            ['Color'] = Color3.fromRGB(255, 255, 255),
+            ['Filled'] = false,
+            ['FillColor'] = Color3.fromRGB(193, 153, 255),
+            ['FillTransparency'] = 0.8,
+            ['OutlineThickness'] = 2
+        },
+        ['TargetLine'] = {
+            ['Enabled'] = true,
+            ['Color'] = Color3.fromRGB(193, 153, 255)
+        }
+    },
+
+    ['Movement'] = {
+        ['Speed Walk'] = { 
+            ['Enabled'] = true, 
+            ['Value'] = 700, 
+            ['ActivationMode'] = 'Toggle'
+        }, 
+        ['Jump Boost'] = { 
+            ['Enabled'] = false, 
+            ['Value'] = 55, 
+            ['ActivationMode'] = 'Toggle'
+        },
+        ['Movement Booster'] = {
+            ['Walkspeed'] = {
+                ['Enabled'] = true,
+                ['Amount'] = 1.1
+            },
+            ['Jumppower'] = {
+                ['Enabled'] = false,
+                ['Amount'] = 1
+            }
+        },
+        ['No Slow'] = {
+            ['Enabled'] = true,
+        },
+    },
+
+    ['Morph'] = {
+        ['Enabled'] = false,
+        ['TargetUsername'] = 'Roblox',
+        ['RagdollOnDeath'] = false,
+        ['LoadBodyParts'] = false
+    },
+
+    ['Identity'] = {
+        ['Enabled'] = false,
+        ['Username'] = 'Roblox',
+        ['DisplayName'] = 'Roblox',
+        ['UserId'] = 1
+    },
+
+    ['Binds'] = {
+        ['Aim Assist Bind'] = Enum.KeyCode.E,
+        ['Trigger Bot Bind'] = Enum.KeyCode.E,
+        ['TargetingBind'] = Enum.KeyCode.E,
+        ['Silent Aim Toggle'] = Enum.KeyCode.V,
+        ['Wall Bang Toggle'] = Enum.KeyCode.L,
+        ['Speed Walk'] = Enum.KeyCode.X,
+        ['Jump Boost'] = Enum.KeyCode.Z,
+        ['Cooldown Changer'] = Enum.KeyCode.N,
+        ['Back Air Toggle'] = Enum.KeyCode.B
     }
 }`;
 
@@ -233,11 +373,42 @@ if (!supabaseUrl || !supabaseKey) {
 }
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// ==================== SUPABASE USER HELPERS ====================
+async function getUser(username) {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('username', username.toLowerCase())
+    .single();
+  return error ? null : data;
+}
+
+async function getAllUsers() {
+  const { data, error } = await supabase.from('users').select('*');
+  return error ? [] : data;
+}
+
+async function saveUser(user) {
+  const { error } = await supabase
+    .from('users')
+    .upsert(user, { onConflict: 'username' });
+  if (error) throw error;
+}
+
+async function updateUser(username, updates) {
+  const { error } = await supabase
+    .from('users')
+    .update(updates)
+    .eq('username', username.toLowerCase());
+  if (error) throw error;
+}
+// ================================================================
+
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
 
-// Helmet security headers (configured to allow inline scripts for simplicity in dev, but can be hardened)
+// Helmet security headers
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -251,10 +422,10 @@ app.use(helmet({
   }
 }));
 
-// Rate Limiter to prevent brute force / DoS
+// Rate Limiter
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => req.originalUrl.startsWith('/api/connections'),
@@ -262,8 +433,8 @@ const limiter = rateLimit({
 });
 
 const connectionsLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Allow frequent connection polling without hitting the auth/config limiter
+  windowMs: 15 * 60 * 1000,
+  max: 1000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many connection status requests. Please wait a moment.' }
@@ -272,72 +443,42 @@ const connectionsLimiter = rateLimit({
 app.use('/api/connections', connectionsLimiter);
 app.use('/api/', limiter);
 
-// Serve static frontend files from 'public' directory
+// Serve static frontend files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Database helper functions (Safe read/writes to database.json)
-function readLocalDB() {
-  try {
-    if (!fs.existsSync(DB_FILE)) {
-      fs.writeFileSync(DB_FILE, JSON.stringify([], null, 2));
-      return [];
-    }
-    const data = fs.readFileSync(DB_FILE, 'utf8');
-    return JSON.parse(data || '[]');
-  } catch (err) {
-    console.error("Error reading database:", err);
-    return [];
-  }
-}
-
-function writeLocalDB(data) {
-  try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-  } catch (err) {
-    console.error("Error writing database:", err);
-  }
-}
-
-// Auth middleware to secure APIs
+// Auth middleware with Supabase
 function authenticateToken(req, res, next) {
   const token = req.cookies.token;
   if (!token) {
     return res.status(401).json({ error: 'Access denied. Please log in.' });
   }
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
+  jwt.verify(token, JWT_SECRET, async (err, user) => {
     if (err) {
       return res.status(403).json({ error: 'Session expired. Please log in again.' });
     }
     
-    // Check if user is banned in local DB
-    const db = readLocalDB();
-    const localUser = db.find(u => u.username.toLowerCase() === user.username.toLowerCase());
-    if (!localUser) {
+    const dbUser = await getUser(user.username);
+    if (!dbUser) {
       return res.status(403).json({ error: 'User account not found.' });
     }
-    if (localUser.banned) {
+    if (dbUser.banned) {
       return res.status(403).json({ error: 'Your account is banned!' });
     }
 
-    req.user = localUser;
+    req.user = dbUser;
     next();
   });
 }
 
-// --- WebSocket Connections for Roblox Executors ---
-// Stores mapping of user -> set of WS connections
+// --- WebSocket Connections ---
 const clientConnections = new Map();
 
-// HTTP upgrade handler for WebSocket
 server.on('upgrade', (request, socket, head) => {
   console.log(`\n[WS Upgrade Attempt] URL: ${request.url}`);
-  console.log(`[WS Upgrade Attempt] IP: ${socket.remoteAddress}`);
-  console.log(`[WS Upgrade Attempt] Headers:`, JSON.stringify(request.headers));
 
   let token = null;
 
-  // Try parsing cookies first
   const cookieHeader = request.headers.cookie || '';
   const cookies = cookieHeader.split(';').reduce((acc, c) => {
     const parts = c.split('=');
@@ -348,7 +489,6 @@ server.on('upgrade', (request, socket, head) => {
   }, {});
   token = cookies.token;
 
-  // Fallback to checking the token in the URL query string manually
   if (!token && request.url) {
     const match = request.url.match(/[?&]token=([^&]+)/);
     if (match) {
@@ -356,38 +496,40 @@ server.on('upgrade', (request, socket, head) => {
     }
   }
 
-  // If token is missing, check if this is a local request and we can bypass validation for debugging
   if (!token) {
     const isLocal = socket.remoteAddress === '127.0.0.1' || socket.remoteAddress === '::1' || socket.remoteAddress === '::ffff:127.0.0.1';
     
     if (isLocal) {
-      const db = readLocalDB();
-      let fallbackUsername = null;
-      if (db.length === 1) {
-        fallbackUsername = db[0].username;
-      } else if (db.length > 1 && global.lastActiveUsername) {
-        fallbackUsername = global.lastActiveUsername;
-      }
-
-      if (fallbackUsername) {
-        const localUser = db.find(u => u.username.toLowerCase() === fallbackUsername.toLowerCase());
-        if (localUser && !localUser.banned) {
-          console.log(`[WS Upgrade Bypass] Localhost connection accepted without token for user: ${localUser.username}`);
-          wss.handleUpgrade(request, socket, head, (ws) => {
-            wss.emit('connection', ws, request, localUser.username);
-          });
-          return;
+      getAllUsers().then(db => {
+        let fallbackUsername = null;
+        if (db.length === 1) {
+          fallbackUsername = db[0].username;
+        } else if (db.length > 1 && global.lastActiveUsername) {
+          fallbackUsername = global.lastActiveUsername;
         }
-      }
+
+        if (fallbackUsername) {
+          getUser(fallbackUsername).then(localUser => {
+            if (localUser && !localUser.banned) {
+              console.log(`[WS Upgrade Bypass] Localhost connection accepted without token for user: ${localUser.username}`);
+              wss.handleUpgrade(request, socket, head, (ws) => {
+                wss.emit('connection', ws, request, localUser.username);
+              });
+              return;
+            }
+          });
+        }
+      });
+      return;
     }
 
-    console.warn(`[WS Upgrade Rejected] Reason: Missing token / no local fallback user.`);
+    console.warn(`[WS Upgrade Rejected] Reason: Missing token`);
     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
     socket.destroy();
     return;
   }
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
+  jwt.verify(token, JWT_SECRET, async (err, user) => {
     if (err) {
       console.warn(`[WS Upgrade Rejected] Reason: JWT verification failed.`);
       socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
@@ -395,20 +537,17 @@ server.on('upgrade', (request, socket, head) => {
       return;
     }
 
-    // Verify user is not banned
-    const db = readLocalDB();
-    const localUser = db.find(u => u.username.toLowerCase() === user.username.toLowerCase());
-    if (!localUser || localUser.banned) {
+    const dbUser = await getUser(user.username);
+    if (!dbUser || dbUser.banned) {
       console.warn(`[WS Upgrade Rejected] Reason: User banned or not found.`);
       socket.write('HTTP/1.1 403 Forbidden - Banned\r\n\r\n');
       socket.destroy();
       return;
     }
 
-    console.log(`[WS Upgrade Approved] Upgrading socket for user: ${localUser.username}`);
-    // Upgrade connection
+    console.log(`[WS Upgrade Approved] Upgrading socket for user: ${dbUser.username}`);
     wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit('connection', ws, request, localUser.username);
+      wss.emit('connection', ws, request, dbUser.username);
     });
   });
 });
@@ -420,9 +559,6 @@ wss.on('connection', (ws, request, username) => {
     clientConnections.set(username, new Set());
   }
   clientConnections.get(username).add(ws);
-
-  // Do not send any config or status on connect.
-  // Configuration is only sent when the user triggers activation.
 
   ws.on('close', () => {
     console.log(`WebSocket client disconnected for user: ${username}`);
@@ -440,7 +576,6 @@ wss.on('connection', (ws, request, username) => {
   });
 });
 
-// Broadcast config updates to a specific user's connected executors
 function broadcastConfigUpdate(username, config) {
   const userConns = clientConnections.get(username);
   let count = 0;
@@ -456,9 +591,9 @@ function broadcastConfigUpdate(username, config) {
   return count;
 }
 
-// --- API Endpoints ---
+// ==================== API ENDPOINTS ====================
 
-// Registration (Sign Up)
+// Registration
 app.post('/api/auth/register', async (req, res) => {
   const { username, password, licenseKey } = req.body;
 
@@ -471,23 +606,20 @@ app.post('/api/auth/register', async (req, res) => {
     return res.status(400).json({ error: 'Username (min 3 chars) and password (min 6 chars) requirements not met.' });
   }
 
-  const db = readLocalDB();
-  
-  // Check if username is already registered
-  const userExists = db.some(u => u.username.toLowerCase() === trimmedUsername.toLowerCase());
-  if (userExists) {
+  // Check if username exists in Supabase
+  const existingUser = await getUser(trimmedUsername);
+  if (existingUser) {
     return res.status(400).json({ error: 'Username is already taken.' });
   }
 
-  // Check if license is already used by a local account
-  const licenseUsedLocally = db.some(u => u.license.toLowerCase() === licenseKey.toLowerCase().trim());
-  if (licenseUsedLocally) {
+  // Check if license is already used
+  const allUsers = await getAllUsers();
+  const licenseUsed = allUsers.some(u => u.license === licenseKey.trim());
+  if (licenseUsed) {
     return res.status(400).json({ error: 'License key has already been used!' });
   }
 
   try {
-    // 1. Check if license exists in Supabase
-    // Using select() with eq() filter
     const { data: licenseData, error: fetchErr } = await supabase
       .from('licenses')
       .select('*')
@@ -498,22 +630,18 @@ app.post('/api/auth/register', async (req, res) => {
       return res.status(400).json({ error: 'License Invalid!' });
     }
 
-    // 2. Check if key is blacklisted
     if (licenseData.blacklisted) {
       return res.status(400).json({ error: 'License Invalid! Key is blacklisted.' });
     }
 
-    // 3. Check if has discord id
     if (!licenseData.discordid) {
       return res.status(400).json({ error: "Your key hasn't been claimed yet!" });
     }
 
-    // 4. Check if cloudclaimed is true
     if (licenseData.cloudclaimed === true) {
       return res.status(400).json({ error: 'This key has already been used!' });
     }
 
-    // 5. Update cloudclaimed to true in Supabase
     const { error: updateErr } = await supabase
       .from('licenses')
       .update({ cloudclaimed: true })
@@ -521,35 +649,30 @@ app.post('/api/auth/register', async (req, res) => {
 
     if (updateErr) {
       console.error("Supabase update error:", updateErr);
-      return res.status(500).json({ error: 'Failed to update license claim status. Try again later.' });
+      return res.status(500).json({ error: 'Failed to update license claim status.' });
     }
 
-    // 6. Securely hash password
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 7. Save user in local DB
-    const newUser = {
+    await saveUser({
       username: trimmedUsername,
       password: hashedPassword,
       license: licenseKey.trim(),
-      config: DEFAULT_LUA_CONFIG, // Default Perc aim assist Lua table configuration
+      config: DEFAULT_LUA_CONFIG,
       banned: false,
-      createdAt: new Date().toISOString()
-    };
-
-    db.push(newUser);
-    writeLocalDB(db);
+      created_at: new Date().toISOString()
+    });
 
     return res.json({ success: true, message: 'Account registered successfully!' });
 
   } catch (err) {
     console.error("Register Error:", err);
-    return res.status(500).json({ error: 'Internal Server Error. Please try again.' });
+    return res.status(500).json({ error: 'Internal Server Error.' });
   }
 });
 
-// Sign In (Login)
+// Login
 app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body;
 
@@ -557,59 +680,46 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(400).json({ error: 'Username and password are required.' });
   }
 
-  const db = readLocalDB();
-  const userIndex = db.findIndex(u => u.username.toLowerCase() === username.trim().toLowerCase());
-
-  if (userIndex === -1) {
+  const user = await getUser(username.trim());
+  if (!user) {
     return res.status(401).json({ error: 'Invalid username or password.' });
   }
 
-  const user = db[userIndex];
-
-  // If user is already marked banned locally
   if (user.banned) {
     return res.status(403).json({ error: 'Your account is banned!' });
   }
 
-  // Verify password
   const passwordMatch = await bcrypt.compare(password, user.password);
   if (!passwordMatch) {
     return res.status(401).json({ error: 'Invalid username or password.' });
   }
 
   try {
-    // Fetch license status from Supabase to verify blacklist status upon logging in
-    const { data: licenseData, error: fetchErr } = await supabase
+    const { data: licenseData } = await supabase
       .from('licenses')
       .select('*')
       .eq('license', user.license)
       .single();
 
-    if (!fetchErr && licenseData) {
-      if (licenseData.blacklisted) {
-        // BAN account instantly
-        user.banned = true;
-        writeLocalDB(db);
-        return res.status(403).json({ error: 'Your account has been instantly banned due to license blacklisting!' });
-      }
+    if (licenseData && licenseData.blacklisted) {
+      await updateUser(user.username, { banned: true });
+      return res.status(403).json({ error: 'Your account has been banned due to license blacklisting!' });
     }
   } catch (err) {
-    console.warn("Failed to check blacklist in Supabase during login. Continuing with caution.", err);
+    console.warn("Failed to check blacklist:", err);
   }
 
-  // Generate JWT token
   const token = jwt.sign(
     { username: user.username },
     JWT_SECRET,
-    { expiresIn: '7d' } // Secure 7 day session duration
+    { expiresIn: '7d' }
   );
 
-  // Set HTTP-Only Cookie for session persistence
   res.cookie('token', token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // secure in production (HTTPS)
+    secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
   global.lastActiveUsername = user.username;
@@ -620,15 +730,14 @@ app.post('/api/auth/login', async (req, res) => {
   });
 });
 
-// Sign Out (Logout)
+// Logout
 app.post('/api/auth/logout', (req, res) => {
   res.clearCookie('token');
   return res.json({ success: true, message: 'Logged out successfully!' });
 });
 
-// Check Session Status
+// Check Session
 app.get('/api/auth/session', authenticateToken, (req, res) => {
-  // Extract token from cookie to return back to frontend
   const token = req.cookies.token;
   global.lastActiveUsername = req.user.username;
   return res.json({
@@ -644,59 +753,53 @@ app.get('/api/config', authenticateToken, (req, res) => {
 });
 
 // Save Configuration
-app.post('/api/config/save', authenticateToken, (req, res) => {
+app.post('/api/config/save', authenticateToken, async (req, res) => {
   const { config } = req.body;
   if (config === undefined) {
     return res.status(400).json({ error: 'Configuration string is required.' });
   }
 
-  // Validate that config contains ONLY the Perc wrapper, nothing outside
   const trimmed = config.trim();
   const match = trimmed.match(/^getgenv\(\)\.Perc\s*=\s*\{[\s\S]*\}$/);
   if (!match) {
     return res.status(400).json({ error: 'Must be a Perc config' });
   }
 
-  const db = readLocalDB();
-  const userIndex = db.findIndex(u => u.username.toLowerCase() === req.user.username.toLowerCase());
-  if (userIndex !== -1) {
-    db[userIndex].config = config;
-    writeLocalDB(db);
+  try {
+    await updateUser(req.user.username, { config: config });
     return res.json({ success: true, message: 'Configuration saved successfully!' });
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to save configuration.' });
   }
-
-  return res.status(500).json({ error: 'Failed to find user profile.' });
 });
 
-// Send/Activate Configuration (Signal connected executors)
-app.post('/api/config/activate', authenticateToken, (req, res) => {
-  const db = readLocalDB();
-  const userIndex = db.findIndex(u => u.username.toLowerCase() === req.user.username.toLowerCase());
-  const user = userIndex !== -1 ? db[userIndex] : null;
-  
-  if (!user) {
-    return res.status(500).json({ error: 'User profile not found.' });
+// Activate Configuration
+app.post('/api/config/activate', authenticateToken, async (req, res) => {
+  try {
+    const user = await getUser(req.user.username);
+    if (!user) {
+      return res.status(500).json({ error: 'User profile not found.' });
+    }
+
+    const activeConnectionsCount = broadcastConfigUpdate(user.username, user.config);
+    
+    return res.json({
+      success: true,
+      message: `Configuration activated and transmitted!`,
+      connectedClients: activeConnectionsCount
+    });
+  } catch (err) {
+    return res.status(500).json({ error: 'Failed to activate configuration.' });
   }
-
-  user.lastActivatedConfig = user.config;
-  writeLocalDB(db);
-
-  const activeConnectionsCount = broadcastConfigUpdate(user.username, user.config);
-  
-  return res.json({
-    success: true,
-    message: `Configuration activated and transmitted!`,
-    connectedClients: activeConnectionsCount
-  });
 });
 
-// Return connection count for frontend
+// Connection count
 app.get('/api/connections', authenticateToken, (req, res) => {
   const userConns = clientConnections.get(req.user.username);
   return res.json({ count: userConns ? userConns.size : 0 });
 });
 
-// Error-handling fallback
+// Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Something went wrong on the server!' });
@@ -704,5 +807,5 @@ app.use((err, req, res, next) => {
 
 // Start Server
 server.listen(PORT, () => {
-  console.log(`Server is running securely on http://localhost:${PORT}`);
+  console.log(`Server is running securely on port ${PORT}`);
 });
