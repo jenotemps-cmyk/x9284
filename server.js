@@ -444,7 +444,7 @@ app.use('/api/connections', connectionsLimiter);
 app.use('/api/', limiter);
 
 // Serve static frontend files
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(__dirname));
 
 // Auth middleware with Supabase
 function authenticateToken(req, res, next) {
