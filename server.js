@@ -27,340 +27,6 @@ const DEFAULT_LUA_CONFIG = `getgenv().Perc = {
             ['Color'] = Color3.fromRGB(193, 153, 255),
             ['VersionColor'] = Color3.fromRGB(255, 255, 255)
         }
-    },
-
-    ['Checks'] = {
-        ['Crew Check'] = false,
-        ['Player Visible'] = false,
-        ['Player Knocked'] = false,
-    },
-
-    ['Aim Assist'] = {
-        ['Enabled'] = true,
-        ['LegitMode'] = true, 
-        ['LegitSpeed'] = 0.1,
-        ['Shake'] = {
-            ['Enabled'] = false,
-            ['Intensity'] = 2,
-            ['Speed'] = 2
-        },
-        ['Smoothing'] = 0.01,
-        ['ActivationMode'] = 'Hold',
-        ['Mode'] = 'HitPart',
-        ['EasingStyle'] = 'Linear',
-        ['EasingDirection'] = 'Out',
-        ['Part'] = 'Head',
-        ['UsePrediction'] = false,
-        ['Prediction'] = { ['X'] = 0, ['Y'] = 0, ['Z'] = 0 },
-        ['FOV'] = {
-            ['Enabled'] = true,
-            ['Visible'] = false, 
-            ['Radius'] = 999999,
-            ['Color'] = Color3.fromRGB(255, 255, 255)
-        },
-        ['Back Air'] = {
-            ['Enabled'] = false,
-            ['ActivationMode'] = 'Toggle'
-        }
-    },
-
-    ['Silent Aim'] = {
-        ['Enabled'] = true,
-        ['ClientRedirection'] = {
-            ['Enabled'] = false,
-            ['Settings'] = {
-                ['Mask Spread'] = false,
-            }
-        },
-        ['Mode'] = 'HitPart',
-        ['Part'] = 'Head',
-        ['Smart'] = {
-            ['Points'] = 5,
-            ['PointScale'] = 0.8,
-        },
-        ['UsePrediction'] = false,
-        ['Prediction'] = { 
-            ['X'] = 0,
-            ['Y'] = 0, 
-            ['Z'] = 0
-        },
-        ['Future'] = {
-            ['Enabled'] = false,
-            ['Multiplier'] = 1.0,
-            ['NetworkPrediction'] = true,
-            ['GroundPrediction'] = true,
-            ['BulletSpeed'] = 725,
-            ['Default'] = { 
-                ['X'] = 0.05, 
-                ['Y'] = 0.02, 
-                ['Z'] = 0.03
-            },
-            ['Guns'] = {
-                ['[Double-Barrel SG]'] = { 
-                    ['X'] = 0.05, 
-                    ['Y'] = 0.02, 
-                    ['Z'] = 0.03
-                },
-                ['[Revolver]'] = { 
-                    ['X'] = 0.05, 
-                    ['Y'] = 0.02, 
-                    ['Z'] = 0.03
-                },
-                ['[TacticalShotgun]'] = { 
-                    ['X'] = 0.05, 
-                    ['Y'] = 0.02, 
-                    ['Z'] = 0.03
-                },
-            }
-        },
-        ['Rage'] = {
-            ['Enabled'] = false,
-        },
-        ['FOV'] = {
-            ['Enabled'] = true,
-            ['Projected'] = false, 
-            ['Visible'] = false,
-            ['Radius'] = 999999999999,
-            ['ActiveColor'] = Color3.fromRGB(0, 255, 0),
-            ['InactiveColor'] = Color3.fromRGB(255, 0, 0)
-        }
-    },
-
-    ['Debug'] = {
-        ['Enabled'] = false,
-        ['ShowPoints'] = false,
-        ['PrintTargets'] = false,
-        ['PrintInputs'] = false 
-    },
-
-    ['Trigger Bot'] = {
-        ['Enabled'] = true,
-        ['ActivationMode'] = 'Hold',
-        ['Delay'] = 0.01,
-        ['Blacklisted Tools'] = { 
-            '[Knife]',
-        },
-        ['FOV'] = {
-            ['Enabled'] = true,
-            ['Radius'] = 999999999,
-        }
-    },
-
-    ['Gun Modifications'] = {
-        ['Double Tap'] = {
-            ['Enabled'] = false,
-            ['Weapons'] = { 
-                '[Revolver]', 
-                '[Double-Barrel SG]'
-            },
-        },
-        ['Quick Reload'] = {
-            ['Enabled'] = false,
-            ['Weapons'] = { 
-                '[Revolver]', 
-                '[Double-Barrel SG]',
-                '[Tactical Shotgun]'
-            },
-        },
-        ['Spread Modifications'] = {
-            ['Enabled'] = true,
-            ['Weapons'] = {
-                ['[Double-Barrel SG]'] = {
-                    ['Enabled'] = true,
-                    ['SpreadAmount'] = 0,
-                },
-                ['[TacticalShotgun]'] = {
-                    ['Enabled'] = true,
-                    ['SpreadAmount'] = 0,
-                },
-            },
-        },
-        ['Cooldown Changer'] = {
-            ['Enabled'] = true,
-            ['Default'] = 0.15,
-            ['Weapons'] = {
-                ['[Revolver]'] = { 
-                    ['Enabled'] = true, 
-                    ['Delay'] = 0.15
-                },
-                ['[Double-Barrel SG]'] = { 
-                    ['Enabled'] = false, 
-                    ['Delay'] = 0.05 
-                },
-                ['[TacticalShotgun]'] = { 
-                    ['Enabled'] = false, 
-                    ['Delay'] = 0.05 
-                },
-            }
-        },
-        ['Shooting Factors'] = {
-            ['Enabled'] = true,
-            ['Weapons'] = {
-                ['[Revolver]'] = true,
-                ['[Double-Barrel SG]'] = true,
-                ['[TacticalShotgun]'] = true,
-            },
-            ['Factors'] = {
-                ['FULLY_LOADED_CHAR'] = true,
-                ['FORCEFIELD'] = true,
-                ['GRABBING_CONSTRAINT'] = true,
-                ['Christmas_Sock'] = true,
-                ['CUFFED'] = true,
-                ['ATTACKING'] = true,
-                ['K.O'] = false,
-                ['GRABBED'] = true,
-                ['RELOAD'] = true,
-                ['DEAD'] = false,
-                ['BLOCK'] = false,
-                ['CROUCH'] = false,
-                ['COOLDOWN'] = true,
-                ['ALL'] = true
-            }
-        },
-        ['Damage Overrider'] = {
-            ['Enabled'] = true,
-            ['Part'] = 'Head'
-        },
-        ['One Tap'] = {
-            ['Enabled'] = false,
-            ['Weapons'] = {
-                '[Double-Barrel SG]',
-                '[TacticalShotgun]',
-            }
-        },
-        ['Infinite Range'] = {
-            ['Enabled'] = true,
-            ['Mode'] = 'Bullet TP',
-            ['Bullet TP'] = {
-                ['Range'] = 9999999999999,
-                ['BypassPos'] = 10
-            },
-            ['Guns'] = {
-                ['[Revolver]'] = {
-                    ['Enabled'] = true,
-                    ['Range'] = 9999
-                },
-                ['[Double-Barrel SG]'] = {
-                    ['Enabled'] = true,
-                    ['Range'] = 9999
-                },
-                ['[TacticalShotgun]'] = {
-                    ['Enabled'] = true,
-                    ['Range'] = 9999
-                }
-            }
-        },
-        ['Hit Offset'] = {
-            ['Enabled'] = false,
-            ['Default'] = {
-                ['X'] = 0,
-                ['Y'] = 0,
-                ['Z'] = 0,
-            },
-            ['Weapons'] = {
-                ['[Revolver]'] = { ['X'] = 0, ['Y'] = 0, ['Z'] = 0 },
-                ['[TacticalShotgun]'] = { ['X'] = 1, ['Y'] = 0, ['Z'] = -1 },
-            }
-        },
-        ['Hitbox Expander'] = {
-            ['Enabled'] = true,
-            ['Size'] = 10,
-        },
-    },
-
-    ['Wall Bang'] = {
-        ['Enabled'] = true,
-        ['Weapons'] = {
-            '[Revolver]',
-            '[Double-Barrel SG]',
-            '[TacticalShotgun]'
-        },
-    },
-
-    ['Skin Changer'] = {
-        ['Enabled'] = false,
-        ['Weapons'] = {
-            ['[Double-Barrel SG]'] = 'Galaxy',
-            ['[Revolver]'] = 'Golden Age',
-            ['[TacticalShotgun]'] = 'Galaxy',
-            ['[Knife]'] = 'Golden Age Tanto',
-        }
-    },
-
-    ['Targeting'] = {
-        ['Enabled'] = true,
-        ['ActivationMode'] = 'Hold',
-        ['SelectionFOV'] = 99999999, 
-        ['Strict'] = true
-    },
-
-    ['Visuals'] = {
-        ['ESP'] = {
-            ['Enabled'] = true,
-            ['Boxes'] = true,
-            ['Names'] = true,
-            ['Color'] = Color3.fromRGB(255, 255, 255),
-            ['Filled'] = false,
-            ['FillColor'] = Color3.fromRGB(193, 153, 255),
-            ['FillTransparency'] = 0.8,
-            ['OutlineThickness'] = 2
-        },
-        ['TargetLine'] = {
-            ['Enabled'] = true,
-            ['Color'] = Color3.fromRGB(193, 153, 255)
-        }
-    },
-
-    ['Movement'] = {
-        ['Speed Walk'] = { 
-            ['Enabled'] = true, 
-            ['Value'] = 700, 
-            ['ActivationMode'] = 'Toggle'
-        }, 
-        ['Jump Boost'] = { 
-            ['Enabled'] = false, 
-            ['Value'] = 55, 
-            ['ActivationMode'] = 'Toggle'
-        },
-        ['Movement Booster'] = {
-            ['Walkspeed'] = {
-                ['Enabled'] = true,
-                ['Amount'] = 1.1
-            },
-            ['Jumppower'] = {
-                ['Enabled'] = false,
-                ['Amount'] = 1
-            }
-        },
-        ['No Slow'] = {
-            ['Enabled'] = true,
-        },
-    },
-
-    ['Morph'] = {
-        ['Enabled'] = false,
-        ['TargetUsername'] = 'Roblox',
-        ['RagdollOnDeath'] = false,
-        ['LoadBodyParts'] = false
-    },
-
-    ['Identity'] = {
-        ['Enabled'] = false,
-        ['Username'] = 'Roblox',
-        ['DisplayName'] = 'Roblox',
-        ['UserId'] = 1
-    },
-
-    ['Binds'] = {
-        ['Aim Assist Bind'] = Enum.KeyCode.E,
-        ['Trigger Bot Bind'] = Enum.KeyCode.E,
-        ['TargetingBind'] = Enum.KeyCode.E,
-        ['Silent Aim Toggle'] = Enum.KeyCode.V,
-        ['Wall Bang Toggle'] = Enum.KeyCode.L,
-        ['Speed Walk'] = Enum.KeyCode.X,
-        ['Jump Boost'] = Enum.KeyCode.Z,
-        ['Cooldown Changer'] = Enum.KeyCode.N,
-        ['Back Air Toggle'] = Enum.KeyCode.B
     }
 }`;
 
@@ -407,19 +73,11 @@ async function updateUser(username, updates) {
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
 
-// Helmet security headers
+// Helmet security headers (disabled for now to test)
 app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      connectSrc: ["'self'", "ws:", "wss:", supabaseUrl],
-      imgSrc: ["'self'", "data:"]
-    }
-  }
+  contentSecurityPolicy: false,
 }));
 
 // Rate Limiter
@@ -443,8 +101,36 @@ const connectionsLimiter = rateLimit({
 app.use('/api/connections', connectionsLimiter);
 app.use('/api/', limiter);
 
-// Serve static frontend files
+// ========== FIXED STATIC FILE SERVING ==========
+// Serve static files from root directory
 app.use(express.static(__dirname));
+// Also try public folder if it exists
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Explicit route for root - serves index.html
+app.get('/', (req, res) => {
+  const indexPath = path.join(__dirname, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>Perc Config Manager</title></head>
+      <body>
+        <h1>Server is Running!</h1>
+        <p>Your API is working. Visit /api/connections to test.</p>
+        <p>Frontend files missing. Upload index.html to root directory.</p>
+      </body>
+      </html>
+    `);
+  }
+});
+
+// Test endpoint
+app.get('/test', (req, res) => {
+  res.json({ status: 'Server is running!', time: new Date().toISOString() });
+});
 
 // Auth middleware with Supabase
 function authenticateToken(req, res, next) {
@@ -497,32 +183,6 @@ server.on('upgrade', (request, socket, head) => {
   }
 
   if (!token) {
-    const isLocal = socket.remoteAddress === '127.0.0.1' || socket.remoteAddress === '::1' || socket.remoteAddress === '::ffff:127.0.0.1';
-    
-    if (isLocal) {
-      getAllUsers().then(db => {
-        let fallbackUsername = null;
-        if (db.length === 1) {
-          fallbackUsername = db[0].username;
-        } else if (db.length > 1 && global.lastActiveUsername) {
-          fallbackUsername = global.lastActiveUsername;
-        }
-
-        if (fallbackUsername) {
-          getUser(fallbackUsername).then(localUser => {
-            if (localUser && !localUser.banned) {
-              console.log(`[WS Upgrade Bypass] Localhost connection accepted without token for user: ${localUser.username}`);
-              wss.handleUpgrade(request, socket, head, (ws) => {
-                wss.emit('connection', ws, request, localUser.username);
-              });
-              return;
-            }
-          });
-        }
-      });
-      return;
-    }
-
     console.warn(`[WS Upgrade Rejected] Reason: Missing token`);
     socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
     socket.destroy();
@@ -606,13 +266,11 @@ app.post('/api/auth/register', async (req, res) => {
     return res.status(400).json({ error: 'Username (min 3 chars) and password (min 6 chars) requirements not met.' });
   }
 
-  // Check if username exists in Supabase
   const existingUser = await getUser(trimmedUsername);
   if (existingUser) {
     return res.status(400).json({ error: 'Username is already taken.' });
   }
 
-  // Check if license is already used
   const allUsers = await getAllUsers();
   const licenseUsed = allUsers.some(u => u.license === licenseKey.trim());
   if (licenseUsed) {
@@ -718,7 +376,7 @@ app.post('/api/auth/login', async (req, res) => {
   res.cookie('token', token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
@@ -757,12 +415,6 @@ app.post('/api/config/save', authenticateToken, async (req, res) => {
   const { config } = req.body;
   if (config === undefined) {
     return res.status(400).json({ error: 'Configuration string is required.' });
-  }
-
-  const trimmed = config.trim();
-  const match = trimmed.match(/^getgenv\(\)\.Perc\s*=\s*\{[\s\S]*\}$/);
-  if (!match) {
-    return res.status(400).json({ error: 'Must be a Perc config' });
   }
 
   try {
@@ -808,4 +460,6 @@ app.use((err, req, res, next) => {
 // Start Server
 server.listen(PORT, () => {
   console.log(`Server is running securely on port ${PORT}`);
+  console.log(`Visit: https://accurate-analysis.up.railway.app`);
+  console.log(`Test endpoint: https://accurate-analysis.up.railway.app/test`);
 });
