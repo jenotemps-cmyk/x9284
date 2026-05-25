@@ -11,8 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Display variables
   const userDisplay = document.getElementById('user-display');
-  const wsUriDisplay = document.getElementById('ws-uri-display');
-  const httpUriDisplay = document.getElementById('http-uri-display');
   const configEditor = document.getElementById('config-editor');
   const saveStatus = document.getElementById('save-status');
   const statusDot = document.getElementById('status-dot');
@@ -20,12 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Interactive buttons
   const btnLogout = document.getElementById('btn-logout');
-  const btnCopyWs = document.getElementById('btn-copy-ws');
-  const btnCopyHttp = document.getElementById('btn-copy-http');
   const btnLoad = document.getElementById('btn-load');
   const btnSave = document.getElementById('btn-save');
   const btnActivate = document.getElementById('btn-activate');
-  const authToast = document.getElementById('auth-toast');
   const phraseDisplay = document.getElementById('phrase-display');
 
   // Settings modal elements
@@ -40,11 +35,20 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeSessionToken = null;
   let connectionCheckInterval = null;
 
+  // Create settings button if it doesn't exist
+  if (!btnSettings && document.querySelector('.session-info')) {
+    const settingsBtn = document.createElement('button');
+    settingsBtn.id = 'btn-settings';
+    settingsBtn.textContent = '⚙️';
+    settingsBtn.className = 'btn btn-secondary btn-small';
+    settingsBtn.style.marginLeft = '8px';
+    document.querySelector('.session-info').appendChild(settingsBtn);
+  }
+
   // --- Branding Logo Management ---
   function applyBrandingLogo() {
     const savedLogo = localStorage.getItem('perc_logo_url');
     if (savedLogo) {
-      // Apply to Auth Logo
       if (logoImg) {
         logoImg.src = savedLogo;
         logoImg.style.display = 'inline-block';
@@ -53,7 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
           fallbackText.style.display = 'none';
         }
       }
-      // Apply to Navbar Logo
       if (navLogoImg) {
         navLogoImg.src = savedLogo;
         navLogoImg.style.display = 'inline-block';
@@ -66,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
         settingLogoUrl.value = savedLogo;
       }
     } else {
-      // Default logo file
       if (logoImg) {
         logoImg.src = 'logo.png';
         logoImg.style.display = 'inline-block';
@@ -78,21 +80,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Initial load of logo
   applyBrandingLogo();
 
-  // Settings modal interaction listeners
-  if (btnSettings) {
-    btnSettings.addEventListener('click', () => {
+  // Settings modal listeners
+  const settingsBtn = document.getElementById('btn-settings');
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
       const savedLogo = localStorage.getItem('perc_logo_url') || '';
-      settingLogoUrl.value = savedLogo;
-      settingsModal.classList.remove('hidden');
+      if (settingLogoUrl) settingLogoUrl.value = savedLogo;
+      if (settingsModal) settingsModal.classList.remove('hidden');
     });
   }
 
   if (btnCloseSettings) {
     btnCloseSettings.addEventListener('click', () => {
-      settingsModal.classList.add('hidden');
+      if (settingsModal) settingsModal.classList.add('hidden');
     });
   }
 
@@ -106,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (btnSaveSettings) {
     btnSaveSettings.addEventListener('click', () => {
-      const url = settingLogoUrl.value.trim();
+      const url = settingLogoUrl ? settingLogoUrl.value.trim() : '';
       if (url) {
         localStorage.setItem('perc_logo_url', url);
         showToast('Branding logo custom image applied!', 'success');
@@ -115,40 +117,69 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Logo reset to default.', 'info');
       }
       applyBrandingLogo();
-      settingsModal.classList.add('hidden');
+      if (settingsModal) settingsModal.classList.add('hidden');
     });
   }
 
   // --- Auth screen toggles ---
-  toSignup.addEventListener('click', (e) => {
-    e.preventDefault();
-    loginForm.classList.add('hidden');
-    signupForm.classList.remove('hidden');
-    hideAuthToast();
-  });
+  if (toSignup) {
+    toSignup.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (loginForm) loginForm.classList.add('hidden');
+      if (signupForm) signupForm.classList.remove('hidden');
+      hideAuthToast();
+    });
+  }
 
-  toLogin.addEventListener('click', (e) => {
-    e.preventDefault();
-    signupForm.classList.add('hidden');
-    loginForm.classList.remove('hidden');
-    hideAuthToast();
-  });
+  if (toLogin) {
+    toLogin.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (signupForm) signupForm.classList.add('hidden');
+      if (loginForm) loginForm.classList.remove('hidden');
+      hideAuthToast();
+    });
+  }
 
   // --- Notification System ---
   function showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      // Create toast container if it doesn't exist
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      container.className = 'toast-area';
+      document.body.appendChild(container);
+    }
+    
     const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
+    toast.className = `toast-notification toast-${type}`;
     toast.textContent = message;
     container.appendChild(toast);
 
     setTimeout(() => {
-      toast.style.animation = 'toastSlideIn 0.3s reverse forwards';
+      toast.classList.add('fade-out');
       setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    }, 3000);
   }
 
-  // --- Phrase loader (reads /phrases.txt and picks a random line) ---
+  function showAuthToast(message) {
+    const authToast = document.getElementById('auth-toast');
+    if (authToast) {
+      authToast.textContent = message;
+      authToast.classList.remove('hidden');
+    } else {
+      showToast(message, 'error');
+    }
+  }
+
+  function hideAuthToast() {
+    const authToast = document.getElementById('auth-toast');
+    if (authToast) {
+      authToast.classList.add('hidden');
+    }
+  }
+
+  // --- Phrase loader ---
   async function loadRandomPhrase(username) {
     if (!phraseDisplay) return;
     try {
@@ -157,99 +188,94 @@ document.addEventListener('DOMContentLoaded', () => {
       const text = await res.text();
       const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
       if (lines.length === 0) {
-        phraseDisplay.textContent = 'No phrases available.';
+        phraseDisplay.textContent = '"precision is key"';
         return;
       }
       const choice = lines[Math.floor(Math.random() * lines.length)];
       const replaced = choice.replace(/\{user\}/g, username || 'Guest');
       phraseDisplay.textContent = replaced;
     } catch (err) {
-      phraseDisplay.textContent = 'Unable to load phrases.';
+      phraseDisplay.textContent = '"precision is key"';
     }
-  }
-
-  function showAuthToast(message) {
-    authToast.textContent = message;
-    authToast.classList.remove('hidden');
-  }
-
-  function hideAuthToast() {
-    authToast.classList.add('hidden');
   }
 
   // --- API Handlers ---
   
   // Submit Login
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    hideAuthToast();
-    
-    const username = document.getElementById('login-username').value;
-    const password = document.getElementById('login-password').value;
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAuthToast();
+      
+      const username = document.getElementById('login-username').value;
+      const password = document.getElementById('login-password').value;
 
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (!response.ok) {
-        showAuthToast(result.error || 'Authentication failed');
-        return;
+        if (!response.ok) {
+          showAuthToast(result.error || 'Authentication failed');
+          return;
+        }
+
+        showToast('Logged in successfully', 'success');
+        activeSessionToken = result.user.token;
+        initializeDashboard(result.user.username);
+      } catch (err) {
+        showAuthToast('Failed to connect to the authentication server');
       }
-
-      showToast('Logged in successfully', 'success');
-      activeSessionToken = result.user.token;
-      initializeDashboard(result.user.username);
-    } catch (err) {
-      showAuthToast('Failed to connect to the authentication server');
-    }
-  });
+    });
+  }
 
   // Submit Sign Up
-  signupForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    hideAuthToast();
+  if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideAuthToast();
 
-    const username = document.getElementById('reg-username').value;
-    const password = document.getElementById('reg-password').value;
-    const licenseKey = document.getElementById('reg-license').value;
+      const username = document.getElementById('reg-username').value;
+      const password = document.getElementById('reg-password').value;
+      const licenseKey = document.getElementById('reg-license').value;
 
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, licenseKey })
-      });
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, licenseKey })
+        });
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (!response.ok) {
-        showAuthToast(result.error || 'Sign up failed');
-        return;
+        if (!response.ok) {
+          showAuthToast(result.error || 'Sign up failed');
+          return;
+        }
+
+        showToast(result.message || 'Account registered!', 'success');
+        if (signupForm) signupForm.classList.add('hidden');
+        if (loginForm) loginForm.classList.remove('hidden');
+        const loginUsername = document.getElementById('login-username');
+        if (loginUsername) loginUsername.value = username;
+      } catch (err) {
+        showAuthToast('Server connection failure during sign up');
       }
-
-      showToast(result.message || 'Account registered!', 'success');
-      // Automatically switch to login screen
-      signupForm.classList.add('hidden');
-      loginForm.classList.remove('hidden');
-      document.getElementById('login-username').value = username;
-    } catch (err) {
-      showAuthToast('Server connection failure during sign up');
-    }
-  });
+    });
+  }
 
   // Load configuration
   async function loadConfig() {
     try {
       const response = await fetch('/api/config');
       const result = await response.json();
-      if (response.ok) {
+      if (response.ok && configEditor) {
         configEditor.value = result.config;
-        saveStatus.textContent = 'Last saved version loaded';
+        if (saveStatus) saveStatus.textContent = 'Last saved version loaded';
         showToast('Configuration loaded successfully', 'success');
       } else {
         showToast(result.error || 'Failed to load configuration', 'error');
@@ -261,6 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Save configuration
   async function saveConfig() {
+    if (!configEditor) return;
     const configData = configEditor.value;
 
     try {
@@ -272,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const result = await response.json();
       if (response.ok) {
-        saveStatus.textContent = 'All changes saved to cloud';
+        if (saveStatus) saveStatus.textContent = 'All changes saved to cloud';
         showToast('Configuration saved successfully!', 'success');
       } else {
         showToast(result.error || 'Failed to save configuration', 'error');
@@ -282,20 +309,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Activate / Broadcast config signal
+  // Activate config
   async function activateConfig() {
-    // Attempt saving config first to keep states consistent
+    if (!configEditor) return;
     const configData = configEditor.value;
 
     try {
-      // Direct Save action
       await fetch('/api/config/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ config: configData })
       });
 
-      // Send Activation Signal
       const response = await fetch('/api/config/activate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
@@ -303,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await response.json();
 
       if (response.ok) {
-        showToast(`Attempting to activate config...`, 'success');
+        showToast(`Activated! ${result.connectedClients || 0} executors connected`, 'success');
         updateConnectionStatus();
       } else {
         showToast(result.error || 'Failed to activate config.', 'error');
@@ -313,20 +338,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Poll active connection count from server
+  // Poll active connection count
   async function updateConnectionStatus() {
     try {
       const response = await fetch('/api/connections');
       const result = await response.json();
       
-      if (response.ok) {
+      if (response.ok && statusDot && statusText) {
         const count = result.count;
         if (count > 0) {
           statusDot.className = 'status-pulse green';
           statusText.textContent = `${count} Executor Connection${count > 1 ? 's' : ''} Active`;
         } else {
-          statusDot.className = 'status-pulse yellow';
-          statusText.textContent = 'No Executors Connected (Idle)';
+          statusDot.className = 'status-pulse orange';
+          statusText.textContent = 'No Executors Connected';
         }
       }
     } catch (err) {
@@ -336,27 +361,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- Dashboard Setup ---
   function initializeDashboard(username) {
-    authContainer.classList.add('hidden');
-    dashboardContainer.classList.remove('hidden');
+    if (authContainer) authContainer.classList.add('hidden');
+    if (dashboardContainer) dashboardContainer.classList.remove('hidden');
 
-    userDisplay.textContent = `User: ${username}`;
-    
-    // Construct the websocket connection URI representation
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUri = `${protocol}//${window.location.host}?token=${activeSessionToken}`;
-    if (wsUriDisplay) wsUriDisplay.textContent = wsUri;
+    if (userDisplay) userDisplay.textContent = `User: ${username}`;
 
-    const httpProtocol = window.location.protocol;
-    const httpUri = `${httpProtocol}//${window.location.host}?token=${activeSessionToken}`;
-    if (httpUriDisplay) httpUriDisplay.textContent = httpUri;
-
-    // Load user's configuration
     loadConfig();
-
-    // Start background status updates
     updateConnectionStatus();
-    connectionCheckInterval = setInterval(updateConnectionStatus, 15000);
-    // Load a random phrase once (no manual refresh button)
+    
+    if (connectionCheckInterval) clearInterval(connectionCheckInterval);
+    connectionCheckInterval = setInterval(updateConnectionStatus, 5000);
     loadRandomPhrase(username);
   }
 
@@ -367,7 +381,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await response.json();
 
       if (response.ok && result.authenticated) {
-        // Retrieve token from response
         activeSessionToken = result.token;
         initializeDashboard(result.username);
       }
@@ -376,40 +389,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Check session status on load
+  // Check session on load
   checkSession();
 
-  // Copy websocket URI to clipboard
-  if (btnCopyWs) {
-    btnCopyWs.addEventListener('click', () => {
-      const text = wsUriDisplay ? wsUriDisplay.textContent : '';
-      navigator.clipboard.writeText(text)
-        .then(() => showToast('Websocket URI copied to clipboard!', 'success'))
-        .catch(() => showToast('Failed to copy to clipboard', 'error'));
+  // Button listeners
+  if (btnLoad) btnLoad.addEventListener('click', loadConfig);
+  if (btnSave) btnSave.addEventListener('click', saveConfig);
+  if (btnActivate) btnActivate.addEventListener('click', activateConfig);
+
+  // Logout
+  if (btnLogout) {
+    btnLogout.addEventListener('click', async () => {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+        showToast('Logged out successfully', 'success');
+        
+        activeSessionToken = null;
+        if (connectionCheckInterval) {
+          clearInterval(connectionCheckInterval);
+        }
+        
+        if (dashboardContainer) dashboardContainer.classList.add('hidden');
+        if (authContainer) authContainer.classList.remove('hidden');
+        
+        if (loginForm) loginForm.reset();
+        if (signupForm) signupForm.reset();
+      } catch (err) {
+        showToast('Logout connection error', 'error');
+      }
     });
   }
 
-  // Copy http URI to clipboard
-  if (btnCopyHttp) {
-    btnCopyHttp.addEventListener('click', () => {
-      const text = httpUriDisplay ? httpUriDisplay.textContent : '';
-      navigator.clipboard.writeText(text)
-        .then(() => showToast('HTTP URI copied to clipboard!', 'success'))
-        .catch(() => showToast('Failed to copy to clipboard', 'error'));
-    });
-  }
-
-  // Action listeners
-  btnLoad.addEventListener('click', loadConfig);
-  btnSave.addEventListener('click', saveConfig);
-  btnActivate.addEventListener('click', activateConfig);
-
-  // --- Luau autocompletion for the config textarea ---
+  // Tab completion for textarea
   if (configEditor) {
     const luauCompletions = [
-      'false','true','nil','function','end','local','return','if','then','elseif','else',
-      'for','in','while','do','break','repeat','until','and','or','not','table','math','string',
-      'pairs','ipairs','next','continue','typeof','typeof','warn','print','spawn','delay'
+      'false', 'true', 'nil', 'function', 'end', 'local', 'return', 'if', 'then', 
+      'elseif', 'else', 'for', 'in', 'while', 'do', 'break', 'repeat', 'until', 
+      'and', 'or', 'not', 'table', 'math', 'string', 'pairs', 'ipairs'
     ];
 
     configEditor.addEventListener('keydown', (e) => {
@@ -421,7 +437,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const before = el.value.slice(0, start);
         const after = el.value.slice(end);
 
-        // find the word fragment immediately before the caret
         const m = before.match(/([A-Za-z_][A-Za-z0-9_]*)$/);
         if (m) {
           const prefix = m[1];
@@ -435,7 +450,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
 
-        // fallback: insert two spaces
         const newBefore = before + '  ';
         el.value = newBefore + after;
         const caret = newBefore.length;
@@ -443,27 +457,4 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
-
-  // Logout action
-  btnLogout.addEventListener('click', async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-      showToast('Logged out successfully', 'success');
-      
-      // Reset variables & view states
-      activeSessionToken = null;
-      if (connectionCheckInterval) {
-        clearInterval(connectionCheckInterval);
-      }
-      
-      dashboardContainer.classList.add('hidden');
-      authContainer.classList.remove('hidden');
-      
-      // Clear forms
-      loginForm.reset();
-      signupForm.reset();
-    } catch (err) {
-      showToast('Logout connection error', 'error');
-    }
-  });
 });
